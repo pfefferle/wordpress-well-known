@@ -1,4 +1,4 @@
-=== yiid connect ===
+=== /.well-known/ ===
 Contributors: Matthias Pfefferle
 Donate link:
 Tags: OpenID, XRD, well-known, XML, Discovery
