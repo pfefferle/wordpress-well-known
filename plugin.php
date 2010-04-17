@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: ./well-known/
+Plugin Name: /.well-known/
 Plugin URI: http://notizblog.org/
 Description: This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
 Version: 0.1
