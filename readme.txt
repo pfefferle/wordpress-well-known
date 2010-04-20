@@ -2,9 +2,9 @@
 Contributors: Matthias Pfefferle
 Donate link:
 Tags: OpenID, XRD, well-known, XML, Discovery
-Requires at least: 2.8
-Tested up to: 2.9
-Stable tag: 0.1
+Requires at least: 2.7
+Tested up to: 2.9.9
+Stable tag: 0.2
 
 This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
 
@@ -37,8 +37,9 @@ From the RFC:
 
 == Changelog ==
 
+= 0.2 =
+* Better doku
 = 0.1 =
-
 * Initial release
 
 == Installation ==
@@ -47,4 +48,26 @@ From the RFC:
 2. Activate the plugin through the *Plugins* menu in WordPress
 3. ...and that's it :)
 
-== Faq ==
+== Frequently Asked Questions ==
+
+= How can I define a well-known uri? =
+
+Set a callback for an URI (/.well-known/robots.txt)
+
+`add_filter('well-known', array('RobotsTxt', 'hostMetaUri'));
+function hostMetaUri($wellKnown) {
+  return $wellKnown[] = array('robots.txt' => array('RobotsTxt', 'printHostMeta'));
+}`
+
+Print robots.txt:
+
+`function printHostMeta() {
+  header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
+  echo "User-agent: *";
+  echo "Allow: /";
+}`
+
+= Is there an implementation where I can write off? =
+
+Yes, you can find an example plugin, which defines a well-known-uri,
+here: http://wordpress.org/extend/plugins/host-meta/
