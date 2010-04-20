@@ -52,14 +52,18 @@ From the RFC:
 
 = How can I define a well-known uri? =
 
+
 Set a callback for an URI (/.well-known/robots.txt)
 
-`add_filter('well-known', array('RobotsTxt', 'hostMetaUri'));
-function hostMetaUri($wellKnown) {
+
+`add_filter('well-known', array('RobotsTxt', 'robotsUri'));
+function robotsUri($wellKnown) {
   return $wellKnown[] = array('robots.txt' => array('RobotsTxt', 'printHostMeta'));
 }`
 
+
 Print robots.txt:
+
 
 `function printHostMeta() {
   header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
@@ -68,6 +72,7 @@ Print robots.txt:
 }`
 
 = Is there an implementation where I can write off? =
+
 
 Yes, you can find an example plugin, which defines a well-known-uri,
 here: http://wordpress.org/extend/plugins/host-meta/
