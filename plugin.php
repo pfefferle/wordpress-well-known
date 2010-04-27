@@ -3,7 +3,7 @@
 Plugin Name: /.well-known/
 Plugin URI: http://notizblog.org/
 Description: This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
-Version: 0.2
+Version: 0.2.1
 Author: Matthias Pfefferle
 Author URI: http://notizblog.org/
 */
@@ -12,6 +12,7 @@ Author URI: http://notizblog.org/
 add_filter('query_vars', array('WellKnownPlugin', 'queryVars'));
 add_action('parse_request', array('WellKnownPlugin', 'delegateRequest'));
 add_action('generate_rewrite_rules', array('WellKnownPlugin', 'rewriteRules'));
+register_activation_hook(__FILE__, array('WellKnown', 'activationHook'));
 
 /**
  * well-known class
@@ -30,7 +31,15 @@ class WellKnownPlugin {
 
     return $vars;
   }
-  
+
+  /**
+   * activation hook
+   */
+  function activationHook() {
+    global $wp_rewrite;
+    $wp_rewrite->flush_rules();
+  }
+
   /**
    * Add rewrite rules for .well-known.
    *
@@ -43,22 +52,22 @@ class WellKnownPlugin {
 
   	$wp_rewrite->rules = $wellKnownRules + $wp_rewrite->rules;
   }
-  
+
   /**
    * delegates the request to the matching (registered) class
    */
   function delegateRequest() {
     global $wp_query, $wp;
-    
+
     $wellKnown = array();
     $wellKnown = apply_filters('well-known', $wellKnown);
-    
+
     $queryVars = $wp->query_vars;
-    
+
     if( array_key_exists('well-known', $queryVars) ) {
       if (array_key_exists($queryVars['well-known'], $wellKnown)) {
         $remoteFunction = $wellKnown[$queryVars['well-known']];
-        
+
         call_user_func($remoteFunction);
       } else {
         header("HTTP/1.1 404 Not Found");
