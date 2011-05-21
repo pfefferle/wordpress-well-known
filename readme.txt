@@ -2,9 +2,9 @@
 Contributors: Matthias Pfefferle
 Donate link: http://www.14101978.de
 Tags: OpenID, XRD, well-known, XML, Discovery
-Requires at least: 2.7
-Tested up to: 2.9.9
-Stable tag: 0.2.1.1
+Requires at least: 3.2
+Tested up to: 3.2.9
+Stable tag: 0.3
 
 This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
 
@@ -37,6 +37,10 @@ From the RFC:
 
 == Changelog ==
 
+= 0.4 =
+* some improvements for host-meta (jrd)
+= 0.3 =
+* adding well-known uris a bit more wordpress-like
 = 0.2.1.1 =
 * Ooops, copy&paste bug
 = 0.2.1 =
@@ -60,23 +64,21 @@ From the RFC:
 Set a callback for an URI (/.well-known/robots.txt)
 
 
-`add_filter('well-known', array('RobotsTxt', 'robotsUri'));
-function robotsUri($wellKnown) {
-  return $wellKnown[] = array('robots.txt' => array('RobotsTxt', 'printHostMeta'));
-}`
+`add_action('well-known', 'robots_txt');`
 
 
 Print robots.txt:
 
 
-`function printHostMeta() {
-  header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
-  echo "User-agent: *";
-  echo "Allow: /";
+`function robots_txt($query) {
+  if ($query == "robots.txt") {
+    header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
+    echo "User-agent: *";
+    echo "Allow: /";
+  }
 }`
 
 = Is there an implementation where I can write off? =
-
 
 Yes, you can find an example plugin, which defines a well-known-uri,
 here: http://wordpress.org/extend/plugins/host-meta/
