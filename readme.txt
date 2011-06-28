@@ -2,9 +2,9 @@
 Contributors: Matthias Pfefferle
 Donate link: http://www.14101978.de
 Tags: OpenID, XRD, well-known, XML, Discovery
-Requires at least: 3.2
-Tested up to: 3.2.9
-Stable tag: 0.3
+Requires at least: 3.1
+Tested up to: 3.2
+Stable tag: 0.5
 
 This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
 
@@ -36,7 +36,8 @@ From the RFC:
    sites' URI space.
 
 == Changelog ==
-
+= 0.5 =
+* better action/filter
 = 0.4 =
 * some improvements for host-meta (jrd)
 = 0.3 =
