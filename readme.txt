@@ -62,21 +62,20 @@ From the RFC:
 = How can I define a well-known uri? =
 
 
-Set a callback for an URI (/.well-known/robots.txt)
+Set a callback for an URI (/.well-known/robots.txt). The action is a combination of `well_known_` and the file-name, in this case the hook must look like
 
-
-`add_action('well-known', 'robots_txt');`
+`add_action('well_known_robots.txt', 'robots_txt');`
 
 
 Print robots.txt:
 
 
 `function robots_txt($query) {
-  if ($query == "robots.txt") {
-    header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
-    echo "User-agent: *";
-    echo "Allow: /";
-  }
+  header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
+  echo "User-agent: *";
+  echo "Allow: /";
+  
+  exit;
 }`
 
 = Is there an implementation where I can write off? =
