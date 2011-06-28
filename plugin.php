@@ -54,7 +54,7 @@ class WellKnownPlugin {
     do_action("well_known_{$id}", $wp->query_vars);
     
     // @deprecated please du not use
-    // still experimenting
+    // still experimenting :)
     if( isset($wp->query_vars['well-known']) ) {
       do_action("well-known", $wp->query_vars);
       exit;
