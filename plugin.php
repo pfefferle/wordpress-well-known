@@ -38,29 +38,29 @@ class WellKnownPlugin {
    */
   function rewriteRules($wp_rewrite) {
     $wellKnownRules = array(
-    	'.well-known/(.+)' => 'index.php?well-known='.$wp_rewrite->preg_index(1),
+      '.well-known/(.+)' => 'index.php?well-known='.$wp_rewrite->preg_index(1),
   	);
 
   	$wp_rewrite->rules = $wellKnownRules + $wp_rewrite->rules;
   }
 
   /**
-   * delegates the request to the matching (registered) class
-   */
+   * delegates the request to the matching (registered) class
+   */
   function delegateRequest() {
     global $wp;
-    
-    if (array_key_exists('well-known', $wp->query_vars)) {
-      $id = $wp->query_vars['well-known'];
 
-      do_action("well_known_{$id}", $wp->query_vars);
+    if (array_key_exists('well-known', $wp->query_vars)) {
+      $id = $wp->query_vars['well-known'];
 
-      // @deprecated please du not use
-      // still experimenting :)
-      if( isset($wp->query_vars['well-known']) ) {
-        do_action("well-known", $wp->query_vars);
-        exit;
-      }
-    }
+      do_action("well_known_{$id}", $wp->query_vars);
+
+      // @deprecated please du not use
+      // still experimenting :)
+      if( isset($wp->query_vars['well-known']) ) {
+        do_action("well-known", $wp->query_vars);
+        exit;
+      }
+    }
   }
 }
