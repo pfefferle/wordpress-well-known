@@ -1,5 +1,5 @@
 === /.well-known/ ===
-Contributors: Matthias Pfefferle
+Contributors: pfefferle
 Donate link: http://www.14101978.de
 Tags: OpenID, XRD, well-known, XML, Discovery
 Requires at least: 3.0.5
