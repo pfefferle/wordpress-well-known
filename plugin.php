@@ -73,7 +73,6 @@ class WellKnownPlugin {
       
       do_action("well-known", $wp->query_vars);
       do_action("well_known_{$id}", $wp->query_vars);
-      wp_die("pääm");
     }
   }
 }
