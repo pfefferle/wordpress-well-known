@@ -3,7 +3,7 @@
 Plugin Name: /.well-known/
 Plugin URI: http://wordpress.org/extend/plugins/well-known/
 Description: This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
-Version: 0.6.1
+Version: 0.6.2
 Author: pfefferle
 Author URI: http://notizblog.org/
 */
@@ -14,18 +14,6 @@ Author URI: http://notizblog.org/
  * @author Matthias Pfefferle
  */
 class WellKnownPlugin {
-  /**
-   * constructor
-   */
-  public function __construct() {
-    add_filter('query_vars', array($this, 'query_vars'));
-    add_action('parse_request', array($this, 'delegate_request'));
-    add_action('generate_rewrite_rules', array($this, 'rewrite_rules'));
-    add_action('admin_init', 'flush_rewrite_rules');
-    
-    register_activation_hook(__FILE__, 'flush_rewrite_rules');
-    register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
-  }
   
   /**
    * Add 'well-known' as a valid query variables.
@@ -67,4 +55,9 @@ class WellKnownPlugin {
   }
 }
 
-new WellKnownPlugin;
+add_filter('query_vars', array('WellKnownPlugin', 'query_vars'));
+add_action('parse_request', array('WellKnownPlugin', 'delegate_request'));
+add_action('generate_rewrite_rules', array('WellKnownPlugin', 'rewrite_rules'));
+    
+register_activation_hook(__FILE__, 'flush_rewrite_rules');
+register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
