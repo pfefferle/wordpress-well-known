@@ -40,6 +40,8 @@ From the RFC:
    sites' URI space.
 
 == Changelog ==
+= 0.6.0 =
+* refactored the code
 = 0.5.1 =
 * fixed some php-warnings
 = 0.5 =

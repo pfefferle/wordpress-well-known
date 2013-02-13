@@ -55,10 +55,10 @@ class WellKnownPlugin {
    */
   public function rewrite_rules($wp_rewrite) {
     $well_known_rules = array(
-    	'.well-known/(.+)' => 'index.php?well-known='.$wp_rewrite->preg_index(1),
-  	);
+      '.well-known/(.+)' => 'index.php?well-known='.$wp_rewrite->preg_index(1),
+    );
 
-  	$wp_rewrite->rules = $well_known_rules + $wp_rewrite->rules;
+    $wp_rewrite->rules = $well_known_rules + $wp_rewrite->rules;
   }
 
   /**
