@@ -4,7 +4,7 @@ Plugin Name: /.well-known/
 Plugin URI: http://wordpress.org/extend/plugins/well-known/
 Description: This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
 Version: 0.6.0
-Author: Matthias Pfefferle
+Author: pfefferle
 Author URI: http://notizblog.org/
 */
 
