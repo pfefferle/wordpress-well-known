@@ -40,6 +40,8 @@ From the RFC:
    sites' URI space.
 
 == Changelog ==
+= 0.6.1 =
+* bug fix
 = 0.6.0 =
 * refactored the code
 = 0.5.1 =

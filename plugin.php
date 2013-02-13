@@ -3,7 +3,7 @@
 Plugin Name: /.well-known/
 Plugin URI: http://wordpress.org/extend/plugins/well-known/
 Description: This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
-Version: 0.6.0
+Version: 0.6.1
 Author: pfefferle
 Author URI: http://notizblog.org/
 */
@@ -14,26 +14,17 @@ Author URI: http://notizblog.org/
  * @author Matthias Pfefferle
  */
 class WellKnownPlugin {
-  
   /**
    * constructor
    */
   public function __construct() {
-    add_action('init', array($this, 'init'));
-
-    register_activation_hook(__FILE__, 'flush_rewrite_rules');
-    register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
-  }
-  
-  /**
-   * Initialize the plugin, registering WordPess hooks.
-   */
-  public function init() {
-    load_plugin_textdomain('wellknown', null, basename(dirname( __FILE__ )));
-
     add_filter('query_vars', array($this, 'query_vars'));
     add_action('parse_request', array($this, 'delegate_request'));
     add_action('generate_rewrite_rules', array($this, 'rewrite_rules'));
+    add_action('admin_init', 'flush_rewrite_rules');
+    
+    register_activation_hook(__FILE__, 'flush_rewrite_rules');
+    register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
   }
   
   /**
@@ -67,7 +58,6 @@ class WellKnownPlugin {
    * @param WP $wp
    */
   public function delegate_request($wp) {
-  
     if (array_key_exists('well-known', $wp->query_vars)) {
       $id = $wp->query_vars['well-known'];
       
@@ -77,4 +67,4 @@ class WellKnownPlugin {
   }
 }
 
-new WellKnownPlugin();
+new WellKnownPlugin;
