@@ -3,7 +3,7 @@
 Plugin Name: /.well-known/
 Plugin URI: http://wordpress.org/extend/plugins/well-known/
 Description: This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
-Version: 0.6.2
+Version: 1.0.0
 Author: pfefferle
 Author URI: http://notizblog.org/
 */
@@ -56,8 +56,8 @@ class WellKnownPlugin {
 }
 
 add_filter('query_vars', array('WellKnownPlugin', 'query_vars'));
-add_action('parse_request', array('WellKnownPlugin', 'delegate_request'));
-add_action('generate_rewrite_rules', array('WellKnownPlugin', 'rewrite_rules'));
+add_action('parse_request', array('WellKnownPlugin', 'delegate_request'), 99);
+add_action('generate_rewrite_rules', array('WellKnownPlugin', 'rewrite_rules'), 99);
     
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');

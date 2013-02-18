@@ -4,7 +4,7 @@ Donate link: http://www.14101978.de
 Tags: OpenID, XRD, well-known, XML, Discovery
 Requires at least: 3.5.1
 Tested up to: 3.2
-Stable tag: 0.6.2
+Stable tag: 1.0.0
 
 This plugin enables "Well-Known URIs" support for WordPress
 
