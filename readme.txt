@@ -1,10 +1,10 @@
 === /.well-known/ ===
 Contributors: pfefferle
 Donate link: http://www.14101978.de
-Tags: OpenID, XRD, well-known, XML, Discovery
+Tags: well-known, discovery
 Requires at least: 3.5.1
-Tested up to: 3.2
-Stable tag: 1.0.0
+Tested up to: 3.8
+Stable tag: 1.0.1
 
 This plugin enables "Well-Known URIs" support for WordPress
 
@@ -40,25 +40,45 @@ From the RFC:
    sites' URI space.
 
 == Changelog ==
+
 = 0.6.2 =
+
 * bug fix
+
 = 0.6.0 =
+
 * refactored the code
+
 = 0.5.1 =
+
 * fixed some php-warnings
+
 = 0.5 =
+
 * better action/filter
+
 = 0.4 =
+
 * some improvements for host-meta (jrd)
+
 = 0.3 =
+
 * adding well-known uris a bit more wordpress-like
+
 = 0.2.1.1 =
+
 * Ooops, copy&paste bug
+
 = 0.2.1 =
+
 * Forgot to flush the rewrite rules
+
 = 0.2 =
+
 * Better doku
+
 = 0.1 =
+
 * Initial release
 
 == Installation ==
@@ -84,7 +104,7 @@ Print robots.txt:
   header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
   echo "User-agent: *";
   echo "Allow: /";
-  
+
   exit;
 }`
 
