@@ -58,7 +58,7 @@ page for this plugin.
 1. Upload the `well-known`-folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the *Plugins* menu in WordPress
 3. If you wish to define up to three Well-Known URIs that return static output,
-   go to *Settings>Well-Known URIs" and define them, e.g.
+   go to *Settings > Well-Known URIs* and define them, e.g.
     
     `Path: /.well-known/`
         robots.txt
