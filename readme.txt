@@ -3,8 +3,8 @@ Contributors: pfefferle
 Donate link: http://www.14101978.de
 Tags: well-known, discovery
 Requires at least: 3.5.1
-Tested up to: 3.8
-Stable tag: 1.0.1
+Tested up to: 4.6.1
+Stable tag: 1.0.2
 
 "Well-Known URIs" for WordPress!
 
@@ -39,6 +39,10 @@ From the RFC:
 > register their use to avoid collisions and minimise impingement upon
 > sites' URI space.
 
+    
+You will need 'manage_options' capability in order to use the Settings
+page for this plugin.
+    
 == Changelog ==
 
 = 0.6.2 =
