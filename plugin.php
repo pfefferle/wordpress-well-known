@@ -128,8 +128,8 @@ class WellKnownSettings {
 
   public function page_init() {
     $section_id = 'well_known_uri';
-    $suffix_title = '/.well-known/';
-    $contents_title = 'Text file contents:';
+    $suffix_title = 'Path: /.well-known/';
+    $contents_title = 'Textual contents:';
 
     register_setting($this->option_group, $this->option_name, array($this, 'sanitize_field'));
 
@@ -157,14 +157,16 @@ class WellKnownSettings {
   public function field_callback($params) {
     $id = $params['id'];
     $type = $params['type'];
-    $value = isset($this->options[$id]) ? esc_attr($this->options[$id]) : '';
+    $value = '';
 
     $prefix = '<input type="' . $type . '" id="' . $id . '" name="' . $this->option_name . '[' . $id . ']" ';
     if ($type == 'text') {
       $prefix .= 'size="80" value="';
+      if (isset($this->options[$id])) $value = esc_attr($this->options[$id]);
       $suffix =  '" />';
     } elseif ($type == 'textarea') {
       $prefix = '<textarea id="' . $id . '" name="' . $this->option_name . '[' . $id . ']" rows="4" cols="80">';
+      if (isset($this->options[$id])) $value = esc_textarea($this->options[$id]);
       $suffix = '</textarea>';
     }
     echo($prefix . $value . $suffix);
@@ -196,7 +198,8 @@ class WellKnownSettings {
   public function sanitize_contents($input, $id) {
     $valid = array();
 
-    if (isset($input[$id])) $valid[$id] = sanitize_text_field($input[$id]);
+    $valid[$id] = $input[$id];
+    if (isset($input[$id])) $valid[$id] = wp_filter_post_kses($input[$id]);
     return $valid;
   }
 }

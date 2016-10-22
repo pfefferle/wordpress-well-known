@@ -45,41 +45,9 @@ page for this plugin.
     
 == Changelog ==
 
-= 0.6.2 =
+= 1.0.2 =
 
-* bug fix
-
-= 0.6.0 =
-
-* refactored the code
-
-= 0.5.1 =
-
-* fixed some php-warnings
-
-= 0.5 =
-
-* better action/filter
-
-= 0.4 =
-
-* some improvements for host-meta (jrd)
-
-= 0.3 =
-
-* adding well-known uris a bit more wordpress-like
-
-= 0.2.1.1 =
-
-* Ooops, copy&paste bug
-
-= 0.2.1 =
-
-* Forgot to flush the rewrite rules
-
-= 0.2 =
-
-* Better doku
+* Add Settings page to allow simple configuration of upto 3 textual URIs
 
 = 0.1 =
 
@@ -89,30 +57,40 @@ page for this plugin.
 
 1. Upload the `well-known`-folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the *Plugins* menu in WordPress
-3. ...and that's it :)
+3. If you wish to define up to three Well-Known URIs that return static output,
+   go to *Settings>Well-Known URIs" and define them, e.g.
+    
+    `Path: /.well-known/`
+        robots.txt
+    
+    `Textual contents:`
+        User-agent: *
+        Allow: /
+4. If you want to configure a Well-Known URI that returns dynamic output,
+   first, edit the plugin source to define a function invoked by
+   `do_action` for the action `"well_known_" + $path`. That function
+    will be invoked when `/.well-known/${path}` is requested.
 
 == Frequently Asked Questions ==
 
 = How can I define a well-known uri? =
 
+Set a callback for an URI (e.g., "/.well-known/robots.txt"),
+identified by `"well_known_" + $path` (e.g., `"well_known_robots.txt"`).
 
-Set a callback for an URI (/.well-known/robots.txt). The action is a combination of `well_known_` and the file-name, in this case the hook must look like
+    `add_action('well_known_robots.txt', 'robots_txt');`
 
-`add_action('well_known_robots.txt', 'robots_txt');`
+In the callback, do whatever processing is appropriate, e.g.,
 
+    `function robots_txt($query) {
+      header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
+      echo "User-agent: *";
+      echo "Allow: /";
 
-Print robots.txt:
-
-
-`function robots_txt($query) {
-  header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
-  echo "User-agent: *";
-  echo "Allow: /";
-
-  exit;
-}`
+      exit;
+    }`
 
 = Is there an implementation where I can write off? =
 
-Yes, you can find an example plugin, which defines a well-known-uri,
+Yes, you can find an example plugin, which defines a Well-Known URI,
 here: http://wordpress.org/extend/plugins/host-meta/
