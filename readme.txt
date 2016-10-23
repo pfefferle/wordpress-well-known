@@ -63,7 +63,10 @@ page for this plugin.
     `Path: /.well-known/`
         robots.txt
     
-    `Textual contents:`
+    `Content-Type:`
+        text/plain; charset=utf-8
+    
+    `URI contents:`
         User-agent: *
         Allow: /
 4. If you want to configure a Well-Known URI that returns dynamic output,
@@ -83,13 +86,17 @@ identified by `"well_known_" + $path` (e.g., `"well_known_robots.txt"`).
 In the callback, do whatever processing is appropriate, e.g.,
 
     `function robots_txt($query) {
-      header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
+      header('Content-Type: text/plain; charset=' . get_option('blog_charset'), TRUE);
       echo "User-agent: *";
       echo "Allow: /";
 
       exit;
     }`
 
+This code defines a URI that returns static output, as shown in Step 3 above.
+(For static output, you will want to use *Settings > Well-Known URIs* page to
+avoid writing any code.)    
+    
 = Is there an implementation where I can write off? =
 
 Yes, you can find an example plugin, which defines a Well-Known URI,

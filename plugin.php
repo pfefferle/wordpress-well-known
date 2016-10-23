@@ -19,6 +19,7 @@ class WellKnownConstants {
   public $option_name = 'well_known_option_name';
 
   public $suffix_prefix = 'suffix_';
+  public $type_prefix = 'type_';
   public $contents_prefix = 'contents_';
 }
 
@@ -81,33 +82,30 @@ function well_known($query) {
   $options = get_option($c->option_name);
   if (is_array($options)) {
     foreach($options as $key => $value) {
-      if (strstr($key, $c->suffix_prefix) === FALSE) continue;
+      if (strpos($key, $c->suffix_prefix) !== 0) continue;
 
       $offset = substr($key, strlen($c->suffix_prefix) - strlen($key));
-      well_knowing($query, $options, $offset);
+      $suffix = $options[$c->suffix_prefix . $offset];
+      if ((empty($suffix)) || (strpos($query[$c->query_var], $suffix) !== 0)) continue;
+
+      $type = $options[$c->type_prefix . $offset];
+      if (empty($type)) $type = 'text/plain; charset=' . get_option('blog_charset');
+      header('Content-Type: ' . $type, TRUE);
+
+      $contents = $options[$c->contents_prefix . $offset];
+      if (is_string($contents)) echo($contents);
+
+      exit;
     }
   }
 
   status_header(404);
-  header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
+  header('Content-Type: text/plain; charset=' . get_option('blog_charset'), TRUE);
   echo 'Not ' . (is_array($options) ? 'Found' : 'configured');
 
   exit;
 }
 add_action('well-known', 'well_known');
-
-function well_knowing($query, $options, $offset) {
-  $c = new WellKnownConstants();
-
-  $suffix = $options[$c->suffix_prefix . $offset];
-  if ((empty($suffix)) || (strstr($query[$c->query_var], $suffix) === false)) return;
-
-  header('Content-Type: text/plain; charset=' . get_option('blog_charset'), true);
-  $contents = $options[$c->contents_prefix . $offset];
-  if (is_string($contents)) echo($contents);
-
-  exit;
-}
 
 
 // (mostly) adapted from Example #2 in https://codex.wordpress.org/Creating_Options_Pages
@@ -153,6 +151,7 @@ class WellKnownSettings {
 
     $section_prefix = 'well_known_uri';
     $suffix_title = 'Path: /.well-known/';
+    $type_title = 'Content-Type:';
     $contents_title = 'URI contents:';
 
     register_setting($this->option_group, $c->option_name, array($this, 'sanitize_field'));
@@ -174,8 +173,6 @@ class WellKnownSettings {
 	}
         $j++;
       }
-      error_log('old: ' . print_r($options, true));
-      error_log('new: ' . print_r($newopts, true));
       update_option($c->option_name, $newopts);
 
       for ($j = 1;; $j++) if (!isset($newopts[$c->suffix_prefix . $j])) break;
@@ -185,6 +182,8 @@ class WellKnownSettings {
       add_settings_section($section_prefix . $i, 'URI #' . $i, array($this, 'print_section_info'), $this->slug);
       add_settings_field($c->suffix_prefix . $i, $suffix_title, array($this, 'field_callback'), $this->slug,
 			 $section_prefix . $i, array('id' => $c->suffix_prefix . $i, 'type' => 'text'));
+      add_settings_field($c->type_prefix . $i, $type_title, array($this, 'field_callback'), $this->slug,
+			 $section_prefix . $i, array('id' => $c->type_prefix . $i, 'type' => 'text'));
       add_settings_field($c->contents_prefix . $i, $contents_title, array($this, 'field_callback'), $this->slug,
 			 $section_prefix . $i, array('id' => $c->contents_prefix . $i, 'type' => 'textarea'));
     }
@@ -217,31 +216,111 @@ class WellKnownSettings {
 
     $valid = array();
 
+    error_log('sanitize in: ' . print_r($input, TRUE));
     for ($i = 1;; $i++) {
       if (!isset($input[$c->suffix_prefix . $i])) break;
 
       $valid += $this->sanitize_suffix($input, $c->suffix_prefix . $i);
+      $valid += $this->sanitize_type($input, $c->type_prefix . $i);
       $valid += $this->sanitize_contents($input, $c->contents_prefix . $i);
     }
-    error_log('sanitize: ' . print_r($valid, true));
+    error_log('sanitize out: ' . print_r($valid, TRUE));
 
     return $valid;
   }
+
   public function sanitize_suffix($input, $id) {
     $valid = array();
 
-    if (isset($input[$id])) {
-      $valid[$id] = trim(sanitize_text_field($input[$id]), '/');
-      if (strstr($valid[$id], '/') !== FALSE) {
-	add_settings_error($id, 'invalid_suffix', __('URI path must not contain "/"'), 'error');
-      }
+    if (!isset($input[$id])) return $valid;
+
+    $result = trim(sanitize_text_field($input[$id]), '/');
+    if (strstr($result, '/') !== FALSE) {
+      add_settings_error($id, 'invalid_suffix', __('URI path must not contain "/"') . ' - ' . $result, 'error');
+      return $valid;
     }
+
+    $valid[$id] = $result;
     return $valid;
   }
+
+// a 90% implementation of https://www.w3.org/Protocols/rfc1341/4_Content-Type.html
+//   no self-respecting browser should have problems with a Content-Type header that this considers valid...
+  public function sanitize_type($input, $id) {
+    $valid = array();
+    $validP = TRUE;
+
+    if (empty($input[$id])) {
+      $valid[$id] = '';
+      return $valid;
+    }
+
+    $parts = explode(';', $input[$id]);
+    list($type, $subtype) = explode('/', $parts[0]);
+
+    $token  = '/^([0-9A-Za-z' .   "'" . preg_quote('!#$%&*+^_`{|}~-') . '])+$/';
+    $word   = '/^([0-9A-Za-z' .         preg_quote('!#$%&*+^_`{|}~-') . '])+$/';
+    $string = '/^"([0-9A-Za-z' .        preg_quote('!#$%&*+^_`{|}~-') . ']|(\\"))+"$/';
+
+    $type = trim(strtolower(sanitize_text_field($type)));
+    if (empty($type)) {
+      add_settings_error($id, 'missing_mime_type', __('Content-Type missing type'), 'error');
+      $validP = FALSE;
+    }
+    // skipping "media" types (audio, image, video)
+    if (   (!in_array($type, array('application', 'message', 'multipart', 'text')))
+        && ((strpos($type, 'x-') !== 0) || (!preg_match($token, $type)))) {
+      add_settings_error($id, 'invalid_mime_type', __('Content-Type has invalid MIME type') . ' - ' . $type, 'error');
+      $validP = FALSE;
+    }
+
+    $subtype = trim(sanitize_text_field($subtype));
+    if (empty($subtype)) {
+      add_settings_error($id, 'missing_mime_subtype', __('Content-Type missing subtype'), 'error');
+      $validP = FALSE;
+    }
+    if (!preg_match($token, $subtype)) {
+      add_settings_error($id, 'invalid_mime_subtype', __('Content-Type invalid subtype') . ' - ' . $subtype, 'error');
+      $validP = FALSE;
+    }
+
+    if (!$validP) return $valid;
+
+    $result = $type . '/' . $subtype;
+    for ($i = 1; $i < count($parts); $i++) {
+      list($attribute, $value) = explode('=', $parts[$i]);
+
+      $attribute = trim(sanitize_text_field($attribute));
+      if (empty($attribute)) {
+	add_settings_error($id, 'missing_attribute', __('Content-Type missing attribute'), 'error');
+	$validP = FALSE;
+	continue;
+      }
+      if (!preg_match($token, $attribute)) {
+	add_settings_error($id, 'invalid_mime_attribute', __('Content-Type invalid attribute') . ' - ' . $attribute, 'error');
+	$validP = FALSE;
+      }
+
+      $value = trim(sanitize_text_field($value));
+      if (empty($value)) {
+	add_settings_error($id, 'missing_value', __('Content-Type missing value'), 'error');
+	$validP = FALSE;
+      }
+      if (!(preg_match($word, $value) || preg_match($string, $value))) {
+	add_settings_error($id, 'invalid_mime_value', __('Content-Type invalid value') . ' - ' . $value, 'error');
+	$validP = FALSE;
+      }
+
+      $result .= '; ' . $attribute . '=' . $value;
+    }
+
+    if ($validP) $valid[$id] = $result;
+    return $valid;
+  }
+
   public function sanitize_contents($input, $id) {
     $valid = array();
 
-    $valid[$id] = $input[$id];
     if (isset($input[$id])) $valid[$id] = wp_filter_post_kses($input[$id]);
     return $valid;
   }
