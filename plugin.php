@@ -13,15 +13,12 @@ Author URI: http://notizblog.org/
  *
  * @author Matthias Pfefferle
  */
-class WellKnownConstants {
-  public $query_var = 'well-known';
 
-  public $option_name = 'well_known_option_name';
-
-  public $suffix_prefix = 'suffix_';
-  public $type_prefix = 'type_';
-  public $contents_prefix = 'contents_';
-}
+define("QUERY_VAR",       "well-known");
+define("OPTION_NAME",     "well_known_option_name");
+define("SUFFIX_PREFIX",   "suffix_");
+define("TYPE_PREFIX",     "type_");
+define("CONTENTS_PREFIX", "contents_");
 
 
 class WellKnownPlugin {
@@ -43,9 +40,8 @@ class WellKnownPlugin {
    * @param WP_Rewrite $wp_rewrite
    */
   public static function rewrite_rules($wp_rewrite) {
-    $c = new WellKnownConstants();
     $well_known_rules = array(
-      '.well-known/(.+)' => 'index.php?' . $c->query_var . '=' . $wp_rewrite->preg_index(1),
+      '.well-known/(.+)' => 'index.php?' . QUERY_VAR . '=' . $wp_rewrite->preg_index(1),
     );
 
     $wp_rewrite->rules = $well_known_rules + $wp_rewrite->rules;
@@ -57,10 +53,8 @@ class WellKnownPlugin {
    * @param WP $wp
    */
   public static function delegate_request($wp) {
-    $c = new WellKnownConstants();
-
-    if (array_key_exists($c->query_var, $wp->query_vars)) {
-      $id = $wp->query_vars[$c->query_var];
+    if (array_key_exists(QUERY_VAR, $wp->query_vars)) {
+      $id = $wp->query_vars[QUERY_VAR];
 
       // run the more specific hook first
       do_action("well_known_{$id}", $wp->query_vars);
@@ -77,22 +71,20 @@ register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
 
 function well_known($query) {
-  $c = new WellKnownConstants();
-
-  $options = get_option($c->option_name);
+  $options = get_option(OPTION_NAME);
   if (is_array($options)) {
     foreach($options as $key => $value) {
-      if (strpos($key, $c->suffix_prefix) !== 0) continue;
+      if (strpos($key, SUFFIX_PREFIX) !== 0) continue;
 
-      $offset = substr($key, strlen($c->suffix_prefix) - strlen($key));
-      $suffix = $options[$c->suffix_prefix . $offset];
-      if ((empty($suffix)) || (strpos($query[$c->query_var], $suffix) !== 0)) continue;
+      $offset = substr($key, strlen(SUFFIX_PREFIX) - strlen($key));
+      $suffix = $options[SUFFIX_PREFIX . $offset];
+      if ((empty($suffix)) || (strpos($query[QUERY_VAR], $suffix) !== 0)) continue;
 
-      $type = $options[$c->type_prefix . $offset];
+      $type = $options[TYPE_PREFIX . $offset];
       if (empty($type)) $type = 'text/plain; charset=' . get_option('blog_charset');
       header('Content-Type: ' . $type, TRUE);
 
-      $contents = $options[$c->contents_prefix . $offset];
+      $contents = $options[CONTENTS_PREFIX . $offset];
       if (is_string($contents)) echo($contents);
 
       exit;
@@ -129,9 +121,7 @@ class WellKnownSettings {
   }
 
   public function create_admin_page() {
-    $c = new WellKnownConstants();
-
-    $this->options = get_option($c->option_name);
+    $this->options = get_option(OPTION_NAME);
 ?>
     <div class="wrap">
       <h1>Well-Known URIs</h1>
@@ -147,22 +137,20 @@ class WellKnownSettings {
     }
 
   public function page_init() {
-    $c = new WellKnownConstants();
-
     $section_prefix = 'well_known_uri';
     $suffix_title = 'Path: /.well-known/';
     $type_title = 'Content-Type:';
     $contents_title = 'URI contents:';
 
-    register_setting($this->option_group, $c->option_name, array($this, 'sanitize_field'));
+    register_setting($this->option_group, OPTION_NAME, array($this, 'sanitize_field'));
 
-    $options = get_option($c->option_name);
+    $options = get_option(OPTION_NAME);
     if (!is_array($options)) $j = 1;
     else {
       $newopts = array();
       for ($i = 1, $j = 1;; $i++) {
-	if (!isset($options[$c->suffix_prefix . $i])) break;
-	if (empty($options[$c->suffix_prefix . $i])) continue;
+	if (!isset($options[SUFFIX_PREFIX . $i])) break;
+	if (empty($options[SUFFIX_PREFIX . $i])) continue;
 
 /* courtesy of https://stackoverflow.com/questions/619610/whats-the-most-efficient-test-of-whether-a-php-string-ends-with-another-string#2137556 */
         $reversed_needle = strrev('_' . $i);
@@ -173,38 +161,36 @@ class WellKnownSettings {
 	}
         $j++;
       }
-      update_option($c->option_name, $newopts);
+      update_option(OPTION_NAME, $newopts);
 
-      for ($j = 1;; $j++) if (!isset($newopts[$c->suffix_prefix . $j])) break;
+      for ($j = 1;; $j++) if (!isset($newopts[SUFFIX_PREFIX . $j])) break;
     }
 
     for ($i = 1; $i <= $j; $i++) {
       add_settings_section($section_prefix . $i, 'URI #' . $i, array($this, 'print_section_info'), $this->slug);
-      add_settings_field($c->suffix_prefix . $i, $suffix_title, array($this, 'field_callback'), $this->slug,
-			 $section_prefix . $i, array('id' => $c->suffix_prefix . $i, 'type' => 'text'));
-      add_settings_field($c->type_prefix . $i, $type_title, array($this, 'field_callback'), $this->slug,
-			 $section_prefix . $i, array('id' => $c->type_prefix . $i, 'type' => 'text'));
-      add_settings_field($c->contents_prefix . $i, $contents_title, array($this, 'field_callback'), $this->slug,
-			 $section_prefix . $i, array('id' => $c->contents_prefix . $i, 'type' => 'textarea'));
+      add_settings_field(SUFFIX_PREFIX . $i, $suffix_title, array($this, 'field_callback'), $this->slug,
+			 $section_prefix . $i, array('id' => SUFFIX_PREFIX . $i, 'type' => 'text'));
+      add_settings_field(TYPE_PREFIX . $i, $type_title, array($this, 'field_callback'), $this->slug,
+			 $section_prefix . $i, array('id' => TYPE_PREFIX . $i, 'type' => 'text'));
+      add_settings_field(CONTENTS_PREFIX . $i, $contents_title, array($this, 'field_callback'), $this->slug,
+			 $section_prefix . $i, array('id' => CONTENTS_PREFIX . $i, 'type' => 'textarea'));
     }
   }
 
   public function print_section_info() {}
 
   public function field_callback($params) {
-    $c = new WellKnownConstants();
-
     $id = $params['id'];
     $type = $params['type'];
     $value = '';
 
-    $prefix = '<input type="' . $type . '" id="' . $id . '" name="' . $c->option_name . '[' . $id . ']" ';
+    $prefix = '<input type="' . $type . '" id="' . $id . '" name="' . OPTION_NAME . '[' . $id . ']" ';
     if ($type === 'text') {
       $prefix .= 'size="80" value="';
       if (isset($this->options[$id])) $value = esc_attr($this->options[$id]);
       $suffix =  '" />';
     } elseif ($type === 'textarea') {
-      $prefix = '<textarea id="' . $id . '" name="' . $c->option_name . '[' . $id . ']" rows="4" cols="80">';
+      $prefix = '<textarea id="' . $id . '" name="' . OPTION_NAME . '[' . $id . ']" rows="4" cols="80">';
       if (isset($this->options[$id])) $value = esc_textarea($this->options[$id]);
       $suffix = '</textarea>';
     }
@@ -212,19 +198,15 @@ class WellKnownSettings {
   }
 
   public function sanitize_field($input) {
-    $c = new WellKnownConstants();
-
     $valid = array();
 
-    error_log('sanitize in: ' . print_r($input, TRUE));
     for ($i = 1;; $i++) {
-      if (!isset($input[$c->suffix_prefix . $i])) break;
+      if (!isset($input[SUFFIX_PREFIX . $i])) break;
 
-      $valid += $this->sanitize_suffix($input, $c->suffix_prefix . $i);
-      $valid += $this->sanitize_type($input, $c->type_prefix . $i);
-      $valid += $this->sanitize_contents($input, $c->contents_prefix . $i);
+      $valid += $this->sanitize_suffix($input, SUFFIX_PREFIX . $i);
+      $valid += $this->sanitize_type($input, TYPE_PREFIX . $i);
+      $valid += $this->sanitize_contents($input, CONTENTS_PREFIX . $i);
     }
-    error_log('sanitize out: ' . print_r($valid, TRUE));
 
     return $valid;
   }
@@ -321,7 +303,8 @@ class WellKnownSettings {
   public function sanitize_contents($input, $id) {
     $valid = array();
 
-    if (isset($input[$id])) $valid[$id] = wp_filter_post_kses($input[$id]);
+    // nothing to sanitize, it's just raw text
+    if (isset($input[$id])) $valid[$id] = $input[$id];
     return $valid;
   }
 }
