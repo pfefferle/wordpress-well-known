@@ -29,7 +29,7 @@ class WellKnownPlugin {
    * @return array
    */
   public static function query_vars($vars) {
-    $vars[] = (new WellKnownConstants())->query_var;
+    $vars[] = QUERY_VAR;
 
     return $vars;
   }
