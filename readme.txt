@@ -71,7 +71,7 @@ page for this plugin.
         Allow: /
 4. If you want to configure a Well-Known URI that returns dynamic output,
    first, edit the plugin source to define a function invoked by
-   `do_action` for the action `"well_known_" + $path`. That function
+   `do_action` for the action `"well_known_uri_" + $path`. That function
     will be invoked when `/.well-known/${path}` is requested.
 
 == Frequently Asked Questions ==
@@ -79,9 +79,9 @@ page for this plugin.
 = How can I define a well-known uri? =
 
 Set a callback for an URI (e.g., "/.well-known/robots.txt"),
-identified by `"well_known_" + $path` (e.g., `"well_known_robots.txt"`).
+identified by `"well_known_uri_" + $path` (e.g., `"well_known_uri_robots.txt"`).
 
-    `add_action('well_known_robots.txt', 'robots_txt');`
+    `add_action('well_known_uri_robots.txt', 'robots_txt');`
 
 In the callback, do whatever processing is appropriate, e.g.,
 

@@ -1,27 +1,33 @@
 <?php
 /*
-Plugin Name: /.well-known/
-Plugin URI: http://wordpress.org/extend/plugins/well-known/
+Plugin Name: /well-known-uris/
+Plugin URI: http://wordpress.org/extend/plugins/well-known-uris/
 Description: This plugin enables "Well-Known URIs" support for WordPress (RFC 5785: http://tools.ietf.org/html/rfc5785).
-Version: 1.0.2
-Author: pfefferle
-Author URI: http://notizblog.org/
+Version: 1.0.3
+Author: mrose17
+Author URI: https://github.com/brave/wordpress-well-known
 */
 
 /**
  * well-known class
  *
+ * Fork:
+ * @author Marshall T. Rose
+ * https://github.com/brave/wordpress-well-known
+ *
+ * Original:
  * @author Matthias Pfefferle
+ * http://notizblog.org/
  */
 
-define("QUERY_VAR",       "well-known");
-define("OPTION_NAME",     "well_known_option_name");
-define("SUFFIX_PREFIX",   "suffix_");
-define("TYPE_PREFIX",     "type_");
-define("CONTENTS_PREFIX", "contents_");
+define("WELL_KNOWN_URI_QUERY_VAR",       "well-known");
+define("WELL_KNOWN_URI_OPTION_NAME",     "well_known_option_name");
+define("WELL_KNOWN_URI_SUFFIX_PREFIX",   "suffix_");
+define("WELL_KNOWN_URI_TYPE_PREFIX",     "type_");
+define("WELL_KNOWN_URI_CONTENTS_PREFIX", "contents_");
 
 
-class WellKnownPlugin {
+class WellKnownUriPlugin {
   /**
    * Add 'well-known' as a valid query variables.
    *
@@ -29,7 +35,7 @@ class WellKnownPlugin {
    * @return array
    */
   public static function query_vars($vars) {
-    $vars[] = QUERY_VAR;
+    $vars[] = WELL_KNOWN_URI_QUERY_VAR;
 
     return $vars;
   }
@@ -41,7 +47,7 @@ class WellKnownPlugin {
    */
   public static function rewrite_rules($wp_rewrite) {
     $well_known_rules = array(
-      '.well-known/(.+)' => 'index.php?' . QUERY_VAR . '=' . $wp_rewrite->preg_index(1),
+      '.well-known/(.+)' => 'index.php?' . WELL_KNOWN_URI_QUERY_VAR . '=' . $wp_rewrite->preg_index(1),
     );
 
     $wp_rewrite->rules = $well_known_rules + $wp_rewrite->rules;
@@ -53,38 +59,38 @@ class WellKnownPlugin {
    * @param WP $wp
    */
   public static function delegate_request($wp) {
-    if (array_key_exists(QUERY_VAR, $wp->query_vars)) {
-      $id = $wp->query_vars[QUERY_VAR];
+    if (array_key_exists(WELL_KNOWN_URI_QUERY_VAR, $wp->query_vars)) {
+      $id = $wp->query_vars[WELL_KNOWN_URI_QUERY_VAR];
 
       // run the more specific hook first
-      do_action("well_known_{$id}", $wp->query_vars);
-      do_action("well-known", $wp->query_vars);
+      do_action("well_known_uri_{$id}", $wp->query_vars);
+      do_action("well-known-uri", $wp->query_vars);
     }
   }
 }
 
-add_filter('query_vars', array('WellKnownPlugin', 'query_vars'));
-add_action('parse_request', array('WellKnownPlugin', 'delegate_request'), 99);
-add_action('generate_rewrite_rules', array('WellKnownPlugin', 'rewrite_rules'), 99);
+add_filter('query_vars', array('WellKnownUriPlugin', 'query_vars'));
+add_action('parse_request', array('WellKnownUriPlugin', 'delegate_request'), 99);
+add_action('generate_rewrite_rules', array('WellKnownUriPlugin', 'rewrite_rules'), 99);
 
 register_activation_hook(__FILE__, 'flush_rewrite_rules');
 register_deactivation_hook(__FILE__, 'flush_rewrite_rules');
 
-function well_known($query) {
-  $options = get_option(OPTION_NAME);
+function well_known_uri($query) {
+  $options = get_option(WELL_KNOWN_URI_OPTION_NAME);
   if (is_array($options)) {
     foreach($options as $key => $value) {
-      if (strpos($key, SUFFIX_PREFIX) !== 0) continue;
+      if (strpos($key, WELL_KNOWN_URI_SUFFIX_PREFIX) !== 0) continue;
 
-      $offset = substr($key, strlen(SUFFIX_PREFIX) - strlen($key));
-      $suffix = $options[SUFFIX_PREFIX . $offset];
-      if ((empty($suffix)) || (strpos($query[QUERY_VAR], $suffix) !== 0)) continue;
+      $offset = substr($key, strlen(WELL_KNOWN_URI_SUFFIX_PREFIX) - strlen($key));
+      $suffix = $options[WELL_KNOWN_URI_SUFFIX_PREFIX . $offset];
+      if ((empty($suffix)) || (strpos($query[WELL_KNOWN_URI_QUERY_VAR], $suffix) !== 0)) continue;
 
-      $type = $options[TYPE_PREFIX . $offset];
+      $type = $options[WELL_KNOWN_URI_TYPE_PREFIX . $offset];
       if (empty($type)) $type = 'text/plain; charset=' . get_option('blog_charset');
       header('Content-Type: ' . $type, TRUE);
 
-      $contents = $options[CONTENTS_PREFIX . $offset];
+      $contents = $options[WELL_KNOWN_URI_CONTENTS_PREFIX . $offset];
       if (is_string($contents)) echo($contents);
 
       exit;
@@ -97,11 +103,11 @@ function well_known($query) {
 
   exit;
 }
-add_action('well-known', 'well_known');
+add_action('well-known-uri', 'well_known_uri');
 
 
 // (mostly) adapted from Example #2 in https://codex.wordpress.org/Creating_Options_Pages
-class WellKnownSettings {
+class WellKnownUriSettings {
   private $options;
   private $slug = 'well-known-admin';
   private $option_group = 'well_known_option_group';
@@ -121,7 +127,7 @@ class WellKnownSettings {
   }
 
   public function create_admin_page() {
-    $this->options = get_option(OPTION_NAME);
+    $this->options = get_option(WELL_KNOWN_URI_OPTION_NAME);
 ?>
     <div class="wrap">
       <h1>Well-Known URIs</h1>
@@ -142,15 +148,15 @@ class WellKnownSettings {
     $type_title = 'Content-Type:';
     $contents_title = 'URI contents:';
 
-    register_setting($this->option_group, OPTION_NAME, array($this, 'sanitize_field'));
+    register_setting($this->option_group, WELL_KNOWN_URI_OPTION_NAME, array($this, 'sanitize_field'));
 
-    $options = get_option(OPTION_NAME);
+    $options = get_option(WELL_KNOWN_URI_OPTION_NAME);
     if (!is_array($options)) $j = 1;
     else {
       $newopts = array();
       for ($i = 1, $j = 1;; $i++) {
-	if (!isset($options[SUFFIX_PREFIX . $i])) break;
-	if (empty($options[SUFFIX_PREFIX . $i])) continue;
+	if (!isset($options[WELL_KNOWN_URI_SUFFIX_PREFIX . $i])) break;
+	if (empty($options[WELL_KNOWN_URI_SUFFIX_PREFIX . $i])) continue;
 
 /* courtesy of https://stackoverflow.com/questions/619610/whats-the-most-efficient-test-of-whether-a-php-string-ends-with-another-string#2137556 */
         $reversed_needle = strrev('_' . $i);
@@ -161,19 +167,19 @@ class WellKnownSettings {
 	}
         $j++;
       }
-      update_option(OPTION_NAME, $newopts);
+      update_option(WELL_KNOWN_URI_OPTION_NAME, $newopts);
 
-      for ($j = 1;; $j++) if (!isset($newopts[SUFFIX_PREFIX . $j])) break;
+      for ($j = 1;; $j++) if (!isset($newopts[WELL_KNOWN_URI_SUFFIX_PREFIX . $j])) break;
     }
 
     for ($i = 1; $i <= $j; $i++) {
       add_settings_section($section_prefix . $i, 'URI #' . $i, array($this, 'print_section_info'), $this->slug);
-      add_settings_field(SUFFIX_PREFIX . $i, $suffix_title, array($this, 'field_callback'), $this->slug,
-			 $section_prefix . $i, array('id' => SUFFIX_PREFIX . $i, 'type' => 'text'));
-      add_settings_field(TYPE_PREFIX . $i, $type_title, array($this, 'field_callback'), $this->slug,
-			 $section_prefix . $i, array('id' => TYPE_PREFIX . $i, 'type' => 'text'));
-      add_settings_field(CONTENTS_PREFIX . $i, $contents_title, array($this, 'field_callback'), $this->slug,
-			 $section_prefix . $i, array('id' => CONTENTS_PREFIX . $i, 'type' => 'textarea'));
+      add_settings_field(WELL_KNOWN_URI_SUFFIX_PREFIX . $i, $suffix_title, array($this, 'field_callback'), $this->slug,
+			 $section_prefix . $i, array('id' => WELL_KNOWN_URI_SUFFIX_PREFIX . $i, 'type' => 'text'));
+      add_settings_field(WELL_KNOWN_URI_TYPE_PREFIX . $i, $type_title, array($this, 'field_callback'), $this->slug,
+			 $section_prefix . $i, array('id' => WELL_KNOWN_URI_TYPE_PREFIX . $i, 'type' => 'text'));
+      add_settings_field(WELL_KNOWN_URI_CONTENTS_PREFIX . $i, $contents_title, array($this, 'field_callback'), $this->slug,
+			 $section_prefix . $i, array('id' => WELL_KNOWN_URI_CONTENTS_PREFIX . $i, 'type' => 'textarea'));
     }
   }
 
@@ -184,13 +190,13 @@ class WellKnownSettings {
     $type = $params['type'];
     $value = '';
 
-    $prefix = '<input type="' . $type . '" id="' . $id . '" name="' . OPTION_NAME . '[' . $id . ']" ';
+    $prefix = '<input type="' . $type . '" id="' . $id . '" name="' . WELL_KNOWN_URI_OPTION_NAME . '[' . $id . ']" ';
     if ($type === 'text') {
       $prefix .= 'size="80" value="';
       if (isset($this->options[$id])) $value = esc_attr($this->options[$id]);
       $suffix =  '" />';
     } elseif ($type === 'textarea') {
-      $prefix = '<textarea id="' . $id . '" name="' . OPTION_NAME . '[' . $id . ']" rows="4" cols="80">';
+      $prefix = '<textarea id="' . $id . '" name="' . WELL_KNOWN_URI_OPTION_NAME . '[' . $id . ']" rows="4" cols="80">';
       if (isset($this->options[$id])) $value = esc_textarea($this->options[$id]);
       $suffix = '</textarea>';
     }
@@ -201,11 +207,11 @@ class WellKnownSettings {
     $valid = array();
 
     for ($i = 1;; $i++) {
-      if (!isset($input[SUFFIX_PREFIX . $i])) break;
+      if (!isset($input[WELL_KNOWN_URI_SUFFIX_PREFIX . $i])) break;
 
-      $valid += $this->sanitize_suffix($input, SUFFIX_PREFIX . $i);
-      $valid += $this->sanitize_type($input, TYPE_PREFIX . $i);
-      $valid += $this->sanitize_contents($input, CONTENTS_PREFIX . $i);
+      $valid += $this->sanitize_suffix($input, WELL_KNOWN_URI_SUFFIX_PREFIX . $i);
+      $valid += $this->sanitize_type($input, WELL_KNOWN_URI_TYPE_PREFIX . $i);
+      $valid += $this->sanitize_contents($input, WELL_KNOWN_URI_CONTENTS_PREFIX . $i);
     }
 
     return $valid;
@@ -309,5 +315,5 @@ class WellKnownSettings {
   }
 }
 
-if (is_admin()) new WellKnownSettings();
+if (is_admin()) new WellKnownUriSettings();
 ?>
