@@ -1,11 +1,12 @@
-=== /.well-known/ ===
-Contributors: pfefferle
+=== well-known-uris ===
+Contributors: pfefferle, mrose17
 Donate link: http://www.14101978.de
-Tags: well-known, discovery
+Tags: well-known, well-known-uris, discovery
 Requires at least: 3.5.1
 Tested up to: 4.6.1
-Stable tag: 1.0.2
-
+Stable tag: 1.0.3
+License: MPL2
+    
 "Well-Known URIs" for WordPress!
 
 == Description ==
@@ -45,13 +46,11 @@ page for this plugin.
     
 == Changelog ==
 
-= 1.0.2 =
+= 1.0.3 =
 
-* Add Settings page to allow simple configuration of static output URIs
-
-= 0.1 =
-
-* Initial release
+* Fork from the original -- https://wordpress.org/plugins/well-known/ --
+  many thanks to https://profiles.wordpress.org/pfefferle/ for the
+  excellent plugin!
 
 == Installation ==
 
