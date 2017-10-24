@@ -43,6 +43,9 @@ From the RFC:
     
 You will need 'manage_options' capability in order to use the Settings
 page for this plugin.
+
+NOTE: as with all plugins, once you are no longer using the plugin, you
+should disable it. This is a good security practice.
     
 == Changelog ==
 
