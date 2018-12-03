@@ -1,6 +1,6 @@
 === /.well-known/ ===
 Contributors: pfefferle
-Donate link: http://www.14101978.de
+Donate link: https://notiz.blog/donate/
 Tags: well-known, discovery
 Requires at least: 3.5.1
 Tested up to: 3.8
